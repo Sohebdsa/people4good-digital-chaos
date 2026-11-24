@@ -3,11 +3,10 @@ import { useApp } from '../../store/appStore';
 import {
   ASSESSMENT, ASSESSMENT_DISCLAIMER, SCALE, categoryScore, overallScore, isComplete, maturityLevel,
 } from '../../data/assessment';
-import { generateRoadmap } from '../../data/roadmap';
 import { ScreenHeader } from '../ScreenHeader';
 import { Radar, ScoreRing } from './Radar';
 import { Icon } from '../Icon';
-import { click, go } from '../../actions';
+import { click } from '../../actions';
 import { setFlagAndCheck } from '../../systems/progression';
 
 export function AssessmentResults({ compact = false }: { compact?: boolean }) {
@@ -65,7 +64,7 @@ export function AssessmentResults({ compact = false }: { compact?: boolean }) {
       {!compact && (
         <div className="card">
           <h3>Choose your priority areas</h3>
-          <p className="muted" style={{ marginTop: 0 }}>Weak areas are prioritised automatically. Tick any area you want to emphasise in your roadmap.</p>
+          <p className="muted" style={{ marginTop: 0 }}>Tick the areas your organisation will focus on first. They’re included in the results PDF.</p>
           <div className="row">
             {ASSESSMENT.map((c) => (
               <button key={c.id} className={`problem ${focus.includes(c.id) ? 'on' : ''}`} style={{ flex: '1 1 160px' }} onClick={() => toggleFocus(c.id)}>
@@ -84,10 +83,8 @@ export function AssessmentResults({ compact = false }: { compact?: boolean }) {
 export function Assessment() {
   const answers = useApp((s) => s.assessment.answers);
   const completedAt = useApp((s) => s.assessment.completedAt);
-  const focus = useApp((s) => s.assessment.focus);
   const setAssessment = useApp((s) => s.setAssessment);
-  const roadmap = useApp((s) => s.roadmap);
-  const setRoadmap = useApp((s) => s.setRoadmap);
+  const orgName = useApp((s) => s.assessment.orgName ?? '');
   const complete = isComplete(answers);
   const [step, setStep] = useState<number>(completedAt && complete ? ASSESSMENT.length : 0);
   const [unlocked, setUnlocked] = useState<string[]>([]);
@@ -107,20 +104,21 @@ export function Assessment() {
     setStep(ASSESSMENT.length);
   };
 
-  const [confirmReplace, setConfirmReplace] = useState(false);
-  const buildRoadmap = (replace: boolean) => {
-    if (roadmap.items.length > 0 && !replace) {
-      setConfirmReplace(true);
-      return;
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const exportPdf = async () => {
+    click();
+    setExporting(true);
+    setExportError(null);
+    try {
+      const { exportResultsPdf } = await import('../../systems/exportPdf');
+      await exportResultsPdf();
+    } catch (e) {
+      console.warn(e);
+      setExportError('Sorry — the PDF could not be created in this browser.');
+    } finally {
+      setExporting(false);
     }
-    const scores = Object.fromEntries(ASSESSMENT.map((c) => [c.id, categoryScore(answers, c.id)]));
-    setRoadmap({ items: generateRoadmap(scores, focus), createdAt: new Date().toISOString() });
-    setFlagAndCheck('flag:roadmap');
-    openRoadmap();
-  };
-  const openRoadmap = () => {
-    useApp.setState({ returnTo: 'assessment' });
-    go('roadmap');
   };
 
   const cat = ASSESSMENT[step];
@@ -132,7 +130,9 @@ export function Assessment() {
         title="Digital Maturity Self-Assessment"
         sub="Separate from your game score — this is about your real organisation."
         right={complete && step === ASSESSMENT.length ? (
-          <button className="btn primary small" onClick={() => buildRoadmap(false)}><Icon name="map" size={18} color="#14213d" /> Build 90-day roadmap</button>
+          <button className="btn primary small" disabled={exporting} onClick={() => void exportPdf()}>
+            <Icon name="download" size={18} color="#14213d" /> {exporting ? 'Preparing…' : 'Export PDF'}
+          </button>
         ) : undefined}
       />
       <div className="screen-body ui-scroll">
@@ -191,20 +191,18 @@ export function Assessment() {
         ) : (
           <>
             <AssessmentResults />
-            {confirmReplace ? (
-              <div className="card" style={{ marginTop: 16 }}>
-                <b>You already have a roadmap.</b> Generate a new one from these results (replacing your edits), or open the existing one?
-                <div className="row" style={{ marginTop: 10, justifyContent: 'flex-end' }}>
-                  <button className="btn" onClick={() => { setConfirmReplace(false); openRoadmap(); }}>Open existing roadmap</button>
-                  <button className="btn coral" onClick={() => { setConfirmReplace(false); buildRoadmap(true); }}>Replace with new roadmap</button>
-                </div>
-              </div>
-            ) : (
-              <div className="row" style={{ marginTop: 16, justifyContent: 'flex-end' }}>
-                <button className="btn" onClick={() => { click(); setStep(0); }}>Review answers</button>
-                <button className="btn primary" onClick={() => buildRoadmap(false)}><Icon name="map" size={18} color="#14213d" /> Build my 90-day roadmap</button>
-              </div>
-            )}
+            <div className="card row" style={{ marginTop: 16 }}>
+              <label style={{ flex: '1 1 240px', display: 'grid', gap: 4, fontWeight: 600, fontSize: 14 }}>
+                Organisation name (optional — printed on the PDF)
+                <input className="field" value={orgName} maxLength={80} placeholder="e.g. Community Health Alliance" onChange={(e) => setAssessment({ orgName: e.target.value })} />
+              </label>
+              <div className="spacer" />
+              <button className="btn" onClick={() => { click(); setStep(0); }}>Review answers</button>
+              <button className="btn primary" disabled={exporting} onClick={() => void exportPdf()}>
+                <Icon name="download" size={18} color="#14213d" /> {exporting ? 'Preparing…' : 'Export results PDF'}
+              </button>
+              {exportError && <div className="login-error" style={{ flexBasis: '100%' }}>{exportError}</div>}
+            </div>
           </>
         )}
       </div>

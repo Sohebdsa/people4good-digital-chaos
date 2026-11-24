@@ -35,6 +35,8 @@ interface Entity {
   done: boolean;
   attracted: boolean;
   spinOffset: number;
+  /** true once obj went back to the pool; obj may already belong to another entity */
+  released?: boolean;
 }
 
 const MAX_HEALTH = 3;
@@ -332,7 +334,6 @@ export class Game {
       progression.add('gate:correct');
       progression.add(`gate:correct:${this.currentGate.id}`);
       this.addScore(200, false);
-      this.health = Math.min(MAX_HEALTH, this.health + 1);
       audio.play('correct');
       this.player.celebrate(true);
       this.particles.burst(this.player.x, 1.6, -1, 0xffc93c, 30, { speed: 3, up: 5 });
@@ -511,7 +512,15 @@ export class Game {
     return obj;
   }
 
+  /**
+   * Return an entity's object to its pool exactly once. Collected items are released at pickup,
+   * then the entity record lingers until it scrolls off; releasing again would put the same object
+   * in the pool twice (two live items sharing one mesh → an item hidden or moved by the other,
+   * i.e. invisible pickups that still trigger). After release the entity must never touch obj.
+   */
   private releaseEntity(e: Entity) {
+    if (e.released) return;
+    e.released = true;
     e.obj.visible = false;
     if (e.kind === 'gate') return;
     let arr = this.pool.get(e.key);

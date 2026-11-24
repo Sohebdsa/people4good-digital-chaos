@@ -126,7 +126,7 @@ class Progression {
 
 export const progression = new Progression();
 
-/** For flags set outside a run (assessment / roadmap). Returns newly unlocked achievement names. */
+/** For flags set outside a run (assessment). Returns newly unlocked achievement names. */
 export function setFlagAndCheck(flag: string): string[] {
   const unlocked: string[] = [];
   useApp.getState().updateProfile((p) => {

@@ -89,7 +89,7 @@ export const TOOLS: ToolDef[] = [
     id: 'roadmap', name: 'Digital Roadmap', group: 'governance', points: 50, color: 0xffc93c, sound: 'chime',
     message: 'Plan digital transformation step by step.',
     detail: 'A practical roadmap sequences small, achievable steps with owners, resources and success measures.',
-    examples: 'A 90-day transformation plan',
+    examples: 'A step-by-step digital plan',
   },
 ];
 

@@ -4,6 +4,7 @@ import { ENV_BY_ID } from '../../data/environments';
 import type { EnvDef, EnvId } from '../../data/types';
 import { buildScenery, buildSkyline, animateScenery, SCENERY } from '../models/scenery';
 import { instantiate } from '../models/bake';
+import { buildPartnerBanner, PARTNERS } from '../models/partnerBanner';
 
 const TRACK_W = 7.4;
 const TRACK_LEN = 300;
@@ -81,6 +82,8 @@ export class World {
   private pool = new Map<string, THREE.Group[]>();
   private nextSide = [0, 0];
   private nextSky = [0, 0];
+  private nextBanner = 0;
+  private bannerCount = 0;
   private seed = 1;
   env: EnvDef = ENV_BY_ID.maze;
   private from: EnvDef = ENV_BY_ID.maze;
@@ -286,6 +289,7 @@ export class World {
     this.props = [];
     this.nextSide = [distance - 40, distance - 36];
     this.nextSky = [distance - 40, distance - 25];
+    this.nextBanner = distance + 24;
   }
 
   private acquire(key: string, make: () => THREE.Group) {
@@ -343,6 +347,19 @@ export class World {
         this.props.push({ obj, key, s, x, animated: false });
         this.nextSky[side] += 26 + Math.random() * 10;
       }
+    }
+
+    // partner billboards: alternate partners and sides roughly every 90 m, angled towards the runner
+    while (this.nextBanner < horizon) {
+      const partner = PARTNERS[this.bannerCount % PARTNERS.length];
+      const side = Math.floor(this.bannerCount / PARTNERS.length) % 2 === 0 ? (this.bannerCount % 2) : 1 - (this.bannerCount % 2);
+      const key = `banner:${partner.id}`;
+      const obj = this.acquire(key, () => buildPartnerBanner(partner.id));
+      obj.rotation.y = side === 0 ? 0.55 : -0.55;
+      obj.scale.setScalar(1);
+      this.props.push({ obj, key, s: this.nextBanner, x: side === 0 ? -5.3 : 5.3, animated: false });
+      this.bannerCount++;
+      this.nextBanner += 85 + Math.random() * 15;
     }
 
     // place & cull

@@ -64,15 +64,18 @@ export const GROUP_ICON: Record<string, string> = {
   data: 'database', ai: 'spark', automation: 'gear', privacy: 'shield', governance: 'flag',
 };
 
+/** People4good brand mark (the four faces). Text is set separately so it can be white on dark. */
 export function Logo({ size = 54 }: { size?: number }) {
   return (
-    <svg className="logo-mark" width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
-      <rect x="2" y="2" width="60" height="60" rx="16" fill="#ffc93c" stroke="#14213d" strokeWidth="4" />
-      <circle cx="22" cy="24" r="7" fill="#14213d" />
-      <circle cx="42" cy="24" r="7" fill="#1fb5a8" stroke="#14213d" strokeWidth="3" />
-      <path d="M12 46c3-8 17-8 20 0M32 46c3-8 17-8 20 0" fill="none" stroke="#14213d" strokeWidth="5" strokeLinecap="round" />
-      <path d="M29 33h6" stroke="#14213d" strokeWidth="4" strokeLinecap="round" />
-    </svg>
+    <img
+      className="logo-mark"
+      src={`${import.meta.env.BASE_URL}assets/brand/people4good-mark.png`}
+      width={size}
+      height={size}
+      alt="People4good"
+      draggable={false}
+      style={{ objectFit: 'contain' }}
+    />
   );
 }
 

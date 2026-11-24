@@ -88,7 +88,7 @@ export function SettingsScreen() {
           <div className="card">
             <h3>Privacy & data</h3>
             <p className="muted" style={{ fontSize: 14 }}>
-              Everything — scores, progress, assessment answers, roadmap and workshop notes — is stored only in this browser (localStorage).
+              Everything — scores, progress, assessment answers and workshop notes — is stored only in this browser (localStorage).
               Nothing is sent to a server. The game never asks for personal information.
             </p>
             {!confirm ? (

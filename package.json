@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
-    "sprites:pack": "python tools/pack_sprites.py"
+    "sprites:pack": "python tools/pack_sprites.py",
+    "server": "node server/leaderboard.mjs",
+    "workshop": "npm run build && node server/leaderboard.mjs"
   },
   "dependencies": {
     "@fontsource/fredoka": "^5.1.0",

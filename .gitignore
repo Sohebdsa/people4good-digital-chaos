@@ -8,3 +8,6 @@ dist
 # third-party agent skills (reinstall with: npx skills add — see skills-lock.json)
 .agents/
 .claude/skills/
+
+# leaderboard data (participant nicknames + scores)
+server/data/
