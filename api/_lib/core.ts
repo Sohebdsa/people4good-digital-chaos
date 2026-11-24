@@ -1,7 +1,7 @@
 /**
  * Shared logic for the leaderboard Vercel Functions (files under api/_lib are not routes).
- * Mirrors server/leaderboard.mjs, but stores the board in a private Vercel Blob
- * (`leaderboard.json`) because functions have no persistent disk.
+ * Mirrors server/leaderboard.mjs. The routes go through store.ts, which uses Upstash Redis when
+ * connected; the Blob storage below (`leaderboard.json`) is the fallback when it isn't.
  *
  * Concurrency: every write uses the blob's ETag (`ifMatch`), so two players saving at the
  * same moment can't overwrite each other — the loser re-reads and retries.

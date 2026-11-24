@@ -1,7 +1,7 @@
 import { json } from './_lib/core.js';
+import { storageKind } from './_lib/store.js';
 
-/** GET /api/health — also reports whether Blob storage is configured. */
+/** GET /api/health — reports which leaderboard storage is active ("redis", "blob", or none). */
 export function GET() {
-  const storage = !!(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID);
-  return json(200, { ok: true, storage });
+  return json(200, { ok: true, storage: !!storageKind, backend: storageKind });
 }
