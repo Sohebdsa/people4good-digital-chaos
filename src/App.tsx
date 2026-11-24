@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Game } from './game/engine/Game';
 import { getGame, setGame } from './game/gameRef';
 import { useApp } from './store/appStore';
@@ -80,6 +81,7 @@ export default function App() {
         {screen === 'login' && <LoginScreen />}
         <NamePrompt />
       </div>
+      <SpeedInsights />
     </div>
   );
 }
