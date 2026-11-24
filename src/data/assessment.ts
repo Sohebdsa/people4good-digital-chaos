@@ -94,7 +94,7 @@ export const ASSESSMENT: AssessmentCategory[] = [
     ],
     strength: 'Digital change is planned, resourced and led.',
     improve: 'Digital efforts are ad-hoc and depend on individuals.',
-    nextSteps: ['Agree three digital priorities with leadership', 'Draft a 90-day roadmap', 'Include digital costs in budgets and proposals'],
+    nextSteps: ['Agree three digital priorities with leadership', 'Draft a simple digital action plan', 'Include digital costs in budgets and proposals'],
   },
 ];
 

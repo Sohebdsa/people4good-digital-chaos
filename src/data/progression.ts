@@ -109,10 +109,9 @@ export const ACHIEVEMENTS: AchievementDef[] = [
       { key: 'env:ai', target: 1, label: 'AI Frontier' },
       { key: 'env:city', target: 1, label: 'Innovation City' },
     ] },
-  { id: 'roadmap_builder', name: 'Roadmap Builder', description: 'Complete the maturity self-assessment and create a 90-day roadmap.', icon: 'map',
+  { id: 'roadmap_builder', name: 'Maturity Mapper', description: 'Complete the digital maturity self-assessment.', icon: 'map',
     reqs: [
       { key: 'flag:assessment', target: 1, label: 'Assessment completed' },
-      { key: 'flag:roadmap', target: 1, label: 'Roadmap created' },
     ] },
 ];
 

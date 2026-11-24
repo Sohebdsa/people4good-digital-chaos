@@ -6,14 +6,14 @@ export interface WorkshopActivity {
   kind: 'run' | 'link';
   env?: EnvId;
   gates?: string[]; // scenario ids prioritised for the run
-  screen?: 'assessment' | 'roadmap' | 'learning' | 'missions';
+  screen?: 'assessment' | 'learning' | 'missions';
   assessmentCategory?: string;
 }
 
 export interface WorkshopOutput {
   id: string;
   label: string;
-  kind: 'problems' | 'tools' | 'assessment' | 'experiment' | 'automation' | 'roadmap' | 'priorities';
+  kind: 'problems' | 'tools' | 'assessment' | 'experiment' | 'automation' | 'priorities';
   assessmentCategories?: string[];
 }
 
@@ -79,27 +79,26 @@ export const WORKSHOP_DAYS: WorkshopDay[] = [
     ],
   },
   {
-    day: 3, title: 'Digital Transformation Planning', subtitle: 'From insight to a 90-day plan', color: '#1fb5a8',
+    day: 3, title: 'Digital Transformation Planning', subtitle: 'From insight to agreed next steps', color: '#1fb5a8',
     objectives: [
       'Identify priorities.',
       'Evaluate digital maturity.',
       'Design a practical adoption strategy.',
-      'Create a 90-day roadmap.',
+      'Agree practical next steps.',
     ],
     activities: [
       { label: 'Run: Responsible Innovation City', description: 'The final transformation run — every risk, every tool.', kind: 'run', env: 'city', gates: ['automation', 'ai_policy', 'public_ai', 'ai_decisions'] },
       { label: 'Complete the maturity self-assessment', description: 'All six weighted areas.', kind: 'link', screen: 'assessment' },
-      { label: 'Build your 90-day roadmap', description: 'Generate, edit and export your plan.', kind: 'link', screen: 'roadmap' },
+      { label: 'Export your results', description: 'Download the assessment and worksheets as a PDF.', kind: 'link', screen: 'assessment' },
     ],
     outputs: [
       { id: 'd3_assessment', label: 'Digital maturity assessment', kind: 'assessment', assessmentCategories: ['infrastructure', 'data', 'ai', 'privacy', 'automation', 'strategy'] },
       { id: 'd3_priorities', label: 'Prioritised improvement areas', kind: 'priorities' },
-      { id: 'd3_roadmap', label: '30 / 60 / 90-day roadmap', kind: 'roadmap' },
     ],
     discussion: [
-      'Which single change would most help your beneficiaries in the next 90 days?',
+      'Which single change would most help your beneficiaries in the next few months?',
       'What resources or support do you need from leadership?',
-      'How will you know your roadmap is working?',
+      'How will you know your next steps are working?',
     ],
   },
 ];

@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { load, save } from '../systems/persistence';
 import { emptyAnswers, type Answers } from '../data/assessment';
-import type { RoadmapItem } from '../data/roadmap';
 import { emptyWorkshop, type WorkshopState } from '../data/workshop';
 import type { EnvId } from '../data/types';
 
@@ -11,12 +10,13 @@ export type Screen =
   | 'game'
   | 'learning'
   | 'assessment'
-  | 'roadmap'
   | 'workshop'
   | 'missions'
   | 'achievements'
   | 'settings'
-  | 'summary';
+  | 'summary'
+  | 'leaderboard'
+  | 'login';
 
 export interface Settings {
   music: number;
@@ -27,6 +27,12 @@ export interface Settings {
   showHints: boolean;
   /** which rendered sprite set the UI uses */
   spriteStyle: 'realistic' | 'illustrated';
+  /** last nickname used on the leaderboard (optional, stays on this device) */
+  playerName: string;
+  /** has seen the optional sign-in page once */
+  welcomed: boolean;
+  /** the one-time "what's your name?" pop-up has been shown */
+  namePrompted: boolean;
 }
 
 export interface Profile {
@@ -48,12 +54,8 @@ export interface AssessmentState {
   answers: Answers;
   focus: string[];
   completedAt: string | null;
-}
-
-export interface RoadmapState {
+  /** optional, only printed on the results PDF */
   orgName: string;
-  items: RoadmapItem[];
-  createdAt: string | null;
 }
 
 export interface RunRequest {
@@ -62,7 +64,7 @@ export interface RunRequest {
   workshopDay?: number;
 }
 
-const defaultSettings: Settings = { music: 0.55, sfx: 0.8, muted: false, quality: 'high', reduceMotion: false, showHints: true, spriteStyle: 'realistic' };
+const defaultSettings: Settings = { music: 0.55, sfx: 0.8, muted: false, quality: 'high', reduceMotion: false, showHints: true, spriteStyle: 'realistic', playerName: '', welcomed: false, namePrompted: false };
 const defaultProfile: Profile = {
   best: 0, bestDistance: 0, impact: 0, runs: 0, counters: {}, unlockedEnvs: ['maze'], discoveredRisks: [], discoveredTools: [],
   missionsDone: [], achievements: [], focusMission: null, tutorialSeen: false,
@@ -75,15 +77,15 @@ interface AppState {
   settings: Settings;
   profile: Profile;
   assessment: AssessmentState;
-  roadmap: RoadmapState;
   workshop: WorkshopState;
   runRequest: RunRequest;
+  /** run waiting for the one-time name pop-up */
+  pendingRun: RunRequest | null;
   setScreen: (s: Screen, returnTo?: Screen) => void;
   openArticle: (id: string | null) => void;
   updateSettings: (p: Partial<Settings>) => void;
   updateProfile: (fn: (p: Profile) => Profile) => void;
   setAssessment: (a: Partial<AssessmentState>) => void;
-  setRoadmap: (r: Partial<RoadmapState>) => void;
   setWorkshop: (fn: (w: WorkshopState) => WorkshopState) => void;
   startRun: (req: RunRequest) => void;
   resetProgress: () => void;
@@ -95,10 +97,10 @@ export const useApp = create<AppState>((set, get) => ({
   articleId: null,
   settings: load('settings', defaultSettings),
   profile: load('profile', defaultProfile),
-  assessment: load('assessment', { answers: emptyAnswers(), focus: [], completedAt: null } as AssessmentState),
-  roadmap: load('roadmap', { orgName: '', items: [], createdAt: null } as RoadmapState),
+  assessment: load('assessment', { answers: emptyAnswers(), focus: [], completedAt: null, orgName: '' } as AssessmentState),
   workshop: load('workshop', emptyWorkshop()),
   runRequest: { env: 'maze' },
+  pendingRun: null,
   setScreen: (screen, returnTo) => set({ screen, returnTo: returnTo ?? get().returnTo }),
   openArticle: (articleId) => set({ articleId }),
   updateSettings: (p) => {
@@ -116,11 +118,6 @@ export const useApp = create<AppState>((set, get) => ({
     save('assessment', assessment);
     set({ assessment });
   },
-  setRoadmap: (r) => {
-    const roadmap = { ...get().roadmap, ...r };
-    save('roadmap', roadmap);
-    set({ roadmap });
-  },
   setWorkshop: (fn) => {
     const workshop = fn(get().workshop);
     save('workshop', workshop);
@@ -129,14 +126,12 @@ export const useApp = create<AppState>((set, get) => ({
   startRun: (runRequest) => set({ runRequest, screen: 'game' }),
   resetProgress: () => {
     const profile = { ...defaultProfile };
-    const assessment = { answers: emptyAnswers(), focus: [], completedAt: null };
-    const roadmap = { orgName: '', items: [], createdAt: null };
+    const assessment = { answers: emptyAnswers(), focus: [], completedAt: null, orgName: '' };
     const workshop = emptyWorkshop();
     save('profile', profile);
     save('assessment', assessment);
-    save('roadmap', roadmap);
     save('workshop', workshop);
-    set({ profile, assessment, roadmap, workshop });
+    set({ profile, assessment, workshop });
   },
 }));
 

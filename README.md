@@ -3,8 +3,8 @@
 A 3D endless runner for NGO professionals about digital transformation, data protection and responsible AI.
 You play **Kiri**, a field-operations lead who runs through five environments, from *The Manual Maze* to
 *Responsible Innovation City*. Along the way you collect digital tools, avoid 20 organisational risks and make
-decisions at Decision Gates. A separate self-assessment and a 90-day roadmap generator turn the session into a
-practical plan.
+decisions at Decision Gates. A separate digital maturity self-assessment, exportable as a PDF, links the game to
+participants' real organisations.
 
 See [DESIGN.md](DESIGN.md) for the creative and technical design.
 
@@ -19,6 +19,76 @@ npm run preview    # serve the production build
 
 Requires Node 18+ and a WebGL-capable browser. Everything runs in the browser. No backend, no accounts, no external
 assets: all 3D models, music and sound effects are generated procedurally at runtime.
+
+## Players and admin login (optional)
+
+The link opens straight into the game. The first time a player presses **Play** without a name, a
+pop-up asks once: enter a name, or **Play as guest**. Nothing requires an account. The name can be
+changed later from the "Playing as …" chip on the main menu.
+
+**Scores post automatically** when a run ends, for named players. To avoid a request on every
+death, the client caches the board's top-10 cut-off and the player's best score. A run is only sent
+when it beats the player's own best and, if the board is full, the 10th-place score. Other runs are
+kept locally, and the next run is only sent if it beats them. The cache expires after 10 minutes, so
+a reset or a busier board is picked up. Guests can add a name on the game-over screen to post that
+run.
+
+The **Admin** tab on the login page (via the menu chip) is for facilitators. Logging in unlocks the leaderboard's admin
+tools: remove a single entry, or reset the whole board. The admin session lasts until the browser
+tab is closed.
+
+> **Demo password:** `p4g-admin-2026`. It's hardcoded in `server/leaderboard.mjs` and
+> `src/systems/auth.ts` on purpose for this small demo, and the repository is public, so anyone
+> can read it. For a real event, start the server with `ADMIN_TOKEN=<your secret> npm run workshop`
+> and log in with that secret instead.
+
+## Branding and partners
+
+The People4good logo is in `public/assets/brand/`: the full logo appears on the login card, and the
+faces mark with a white wordmark appears in the menu and as the favicon. Event partners
+**Project Tech4Dev** and **Infoxchange** appear on roadside billboards about every 90 m during runs
+(`src/game/models/partnerBanner.ts`). To add or swap a partner, drop its logo in
+`public/assets/brand/` and add it to `PARTNERS`.
+
+## Leaderboard (top 10 participants)
+
+The board shows each participant's best score by name. At game over, players save their run. The
+menu's **Leaderboard** screen shows the top 10.
+
+**Run a workshop** (the game and the shared leaderboard on one port):
+
+```bash
+npm run workshop                  # builds, then serves http://localhost:8787
+ADMIN_TOKEN=choose-a-secret npm run workshop   # replace the demo admin password
+```
+
+The server prints a LAN address (e.g. `http://192.168.1.20:8787`). Participants on the same Wi-Fi
+open it on their phones or laptops. Between groups, a facilitator logs in as admin and clears the
+board under **Leaderboard → Admin tools**.
+
+**During development:** run `npm run server` in one terminal and `npm run dev` in another (Vite
+proxies `/api` to port 8787).
+
+**Hosting the game elsewhere** (for example a static site): build with
+`VITE_LEADERBOARD_URL=https://your-server` and start the server with `CORS_ORIGIN=https://your-site`.
+
+**Server details** (`server/leaderboard.mjs`, Node 18+, no dependencies):
+
+| | |
+|---|---|
+| API | `GET /api/leaderboard`, `POST /api/scores`, `POST /api/admin/login`, `DELETE /api/leaderboard` and `DELETE /api/scores?name=` (admin only), `GET /api/health` |
+| Storage | `server/data/leaderboard.json` (git-ignored), written atomically (temp file then rename) |
+| Validation | nicknames are 1–16 letters, numbers, spaces, `.`, `_` or `-`; a plausibility cap on score versus distance |
+| Rate limit | 60 submissions per minute per IP (a whole room may share one router) |
+| Settings | `PORT`, `HOST`, `DATA_FILE`, `ADMIN_TOKEN`, `CORS_ORIGIN` |
+
+The plausibility check stops casual tampering but isn't a full anti-cheat system. The board is
+built for trusted workshop groups.
+
+**Offline:** if the server can't be reached, scores go to a per-device top 10, and the UI labels it
+"This device only".
+
+**Privacy:** the UI asks for a nickname, not a full name, and stores nothing else about the player.
 
 ## Controls
 
@@ -42,16 +112,15 @@ slid under. **Walls** need a lane change. Every row of risks leaves at least one
 - **15 collectibles** and **6 power-ups**: Data Protection Shield, AI Productivity Boost, Automation Boost, Data
   Magnet, Backup Shield and Human Oversight.
 - **10 Decision Gate scenarios**, some with 2 options and some with 3, shown in random order. A good choice gives
-  +200 points and +1 health. A risky choice costs 1 health (never fatal), unless Human Oversight catches it.
+  +200 points. A risky choice costs 1 health (never fatal), unless Human Oversight catches it.
 - **5 environments** that cross-fade lighting, scenery and music as you run. Reaching one unlocks it as a start point.
 - **7 missions, 8 achievements** and an Impact Points total, saved in localStorage.
 - **Digital Maturity Self-Assessment:** 6 weighted areas, 30 questions, a radar chart, strengths, improvement
   areas and next steps. It is labelled as an educational self-assessment and is kept separate from the game score.
-- **90-day roadmap:** generated from the assessment and fully editable (action, area, priority, role,
-  timeline, resources, success metric, status). It exports to PDF together with the workshop worksheets.
+  The results export to PDF together with the workshop worksheets.
 - **Workshop Mode (3 days):** objectives, discussion prompts, themed runs that put the day's Decision Gates first,
   and worksheets (problem identification, tools discovery, AI experiment sheet, automation opportunities,
-  priorities, roadmap).
+  priorities).
 - **Knowledge Center:** sections A–E (fundamentals, data management, AI fundamentals, responsible AI, tools
   discovery), plus a guide to all 20 risks and the collectibles.
 - **Audio:** Web Audio synthesis for every sound effect and an adaptive music sequencer that changes per
@@ -62,9 +131,9 @@ slid under. **Walls** need a lane change. Every row of risks leaves at least one
 ```
 src/
   game/          engine (loop, input), player, world streaming, spawning, effects, procedural models
-  components/    React UI: menu, HUD, gate, pause, game over, learning, assessment, roadmap, workshop…
+  components/    React UI: menu, HUD, gate, pause, game over, learning, assessment, leaderboard, workshop…
   systems/       audio, progression (missions/achievements), persistence, PDF export
-  data/          all educational content: risks, tools, scenarios, environments, learning, assessment, roadmap
+  data/          all educational content: risks, tools, scenarios, environments, learning, assessment, workshop
   store/         Zustand stores (persistent app state, transient run/HUD state)
 ```
 

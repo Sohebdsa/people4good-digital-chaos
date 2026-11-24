@@ -8,11 +8,13 @@ import { GameUI } from './components/game-hud/GameUI';
 import { LearningSummary } from './components/game-over/LearningSummary';
 import { LearningCenter } from './components/learning-center/LearningCenter';
 import { Assessment } from './components/assessment/Assessment';
-import { Roadmap } from './components/roadmap/Roadmap';
 import { Workshop } from './components/workshop/Workshop';
 import { Missions } from './components/achievements/Missions';
 import { Achievements } from './components/achievements/Achievements';
 import { SettingsScreen } from './components/settings/SettingsScreen';
+import { Leaderboard } from './components/leaderboard/Leaderboard';
+import { LoginScreen } from './components/login/LoginScreen';
+import { NamePrompt } from './components/login/NamePrompt';
 
 export default function App() {
   const host = useRef<HTMLDivElement>(null);
@@ -58,7 +60,7 @@ export default function App() {
             <div className="card modal">
               <h2>3D graphics unavailable</h2>
               <p>
-                Your browser could not start WebGL, so the runner cannot be displayed. The Learning Center, self-assessment and roadmap
+                Your browser could not start WebGL, so the runner cannot be displayed. The Learning Center and self-assessment
                 still work from the menu. Try enabling hardware acceleration or another browser to play.
               </p>
             </div>
@@ -70,11 +72,13 @@ export default function App() {
         {screen === 'summary' && <LearningSummary />}
         {screen === 'learning' && <LearningCenter />}
         {screen === 'assessment' && <Assessment />}
-        {screen === 'roadmap' && <Roadmap />}
         {screen === 'workshop' && <Workshop />}
         {screen === 'missions' && <Missions />}
         {screen === 'achievements' && <Achievements />}
         {screen === 'settings' && <SettingsScreen />}
+        {screen === 'leaderboard' && <Leaderboard />}
+        {screen === 'login' && <LoginScreen />}
+        <NamePrompt />
       </div>
     </div>
   );

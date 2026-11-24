@@ -4,7 +4,6 @@ import { WORKSHOP_DAYS, type WorkshopOutput, type WorkshopActivity } from '../..
 import { RISKS } from '../../data/risks';
 import { TOOLS } from '../../data/tools';
 import { ASSESSMENT, categoryScore } from '../../data/assessment';
-import { PHASES } from '../../data/roadmap';
 import { ScreenHeader } from '../ScreenHeader';
 import { Icon, hex } from '../Icon';
 import { click, go, launchRun } from '../../actions';
@@ -138,19 +137,6 @@ function PrioritiesSheet() {
   );
 }
 
-function RoadmapSheet() {
-  const items = useApp((s) => s.roadmap.items);
-  return (
-    <>
-      <div className="row">
-        {PHASES.map((p) => <span className="tag" key={p.id}>{p.name}: {items.filter((i) => i.phase === p.id).length}</span>)}
-      </div>
-      <button className="btn small" style={{ marginTop: 10 }} onClick={() => { useApp.setState({ returnTo: 'workshop' }); go('roadmap'); }}>
-        <Icon name="map" size={16} color="#14213d" /> Open roadmap & export PDF
-      </button>
-    </>
-  );
-}
 
 function OutputCard({ o }: { o: WorkshopOutput }) {
   const done = useApp((s) => !!s.workshop.done[o.id]);
@@ -174,7 +160,6 @@ function OutputCard({ o }: { o: WorkshopOutput }) {
           {o.kind === 'experiment' && <ExperimentSheet />}
           {o.kind === 'automation' && <AutomationSheet />}
           {o.kind === 'priorities' && <PrioritiesSheet />}
-          {o.kind === 'roadmap' && <RoadmapSheet />}
         </div>
       )}
     </div>
@@ -228,7 +213,7 @@ export function Workshop() {
                 return (
                   <div className="item" key={a.label}>
                     <div className="ic" style={{ background: a.kind === 'run' ? d.color : 'var(--ink)' }}>
-                      <Icon name={a.kind === 'run' ? 'play' : a.screen === 'learning' ? 'book' : a.screen === 'roadmap' ? 'map' : a.screen === 'missions' ? 'target' : 'chart'} color="#fff" />
+                      <Icon name={a.kind === 'run' ? 'play' : a.screen === 'learning' ? 'book' : a.screen === 'missions' ? 'target' : 'chart'} color="#fff" />
                     </div>
                     <div>
                       <h4>{a.label}</h4>

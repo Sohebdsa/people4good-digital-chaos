@@ -1,5 +1,4 @@
 import { ASSESSMENT, ASSESSMENT_DISCLAIMER, categoryScore, isComplete, maturityLevel, overallScore } from '../data/assessment';
-import { PHASES, ROADMAP_NOTE } from '../data/roadmap';
 import { RISK_BY_ID } from '../data/risks';
 import { useApp } from '../store/appStore';
 
@@ -13,11 +12,11 @@ const clean = (t: string) =>
     .replace(/…/g, '...')
     .replace(/[^\x20-\x7E\n]/g, '');
 
-/** Builds the workshop report PDF (assessment + roadmap + worksheets). jsPDF is lazy-loaded. */
-export async function exportRoadmapPdf() {
+/** Builds the results PDF (self-assessment + workshop worksheets). jsPDF is lazy-loaded. */
+export async function exportResultsPdf() {
   const [{ jsPDF }, autoTableMod] = await Promise.all([import('jspdf'), import('jspdf-autotable')]);
   const autoTable = autoTableMod.default;
-  const { assessment, roadmap, workshop } = useApp.getState();
+  const { assessment, workshop } = useApp.getState();
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const W = doc.internal.pageSize.getWidth();
   const M = 40;
@@ -36,10 +35,10 @@ export async function exportRoadmapPdf() {
   doc.setFontSize(11);
   doc.text('PEOPLE4GOOD AI LAB', M, 32);
   doc.setFontSize(22);
-  doc.text('Digital Transformation Roadmap', M, 60);
+  doc.text('Digital Maturity Results', M, 60);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  const org = roadmap.orgName.trim() || 'Our organisation';
+  const org = (assessment.orgName ?? '').trim() || 'Our organisation';
   doc.text(clean(`${org}  |  Generated ${new Date().toLocaleDateString()}`), M, 80);
   y = 128;
 
@@ -90,34 +89,6 @@ export async function exportRoadmapPdf() {
     y = lastY() + 14;
     if (assessment.focus.length) para(`Priority areas chosen: ${assessment.focus.map((f) => ASSESSMENT.find((c) => c.id === f)?.name).join(', ')}`);
     para(ASSESSMENT_DISCLAIMER, 8.5, [120, 120, 130]);
-  }
-
-  // roadmap
-  heading('90-day action plan');
-  para(ROADMAP_NOTE, 8.5, [120, 120, 130]);
-  if (!roadmap.items.length) para('No actions added yet.');
-  for (const ph of PHASES) {
-    const items = roadmap.items.filter((i) => i.phase === ph.id);
-    if (!items.length) continue;
-    if (y > 700) {
-      doc.addPage();
-      y = 50;
-    }
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(...ink);
-    doc.text(clean(`${ph.name}  (${ph.timeline})`), M, y);
-    y += 6;
-    autoTable(doc, {
-      startY: y,
-      margin: { left: M, right: M },
-      head: [['Action', 'Priority', 'Responsible', 'Timeline', 'Resources', 'Success metric', 'Status']],
-      body: items.map((i) => [i.action || '(untitled)', i.priority, i.owner || '-', i.timeline, i.resources || '-', i.metric || '-', i.status].map(clean)),
-      headStyles: { fillColor: teal, textColor: 255 },
-      styles: { fontSize: 8.5, cellPadding: 4, valign: 'top' },
-      columnStyles: { 0: { cellWidth: 120 }, 1: { cellWidth: 44 }, 2: { cellWidth: 62 }, 3: { cellWidth: 52 }, 6: { cellWidth: 52 } },
-    });
-    y = lastY() + 18;
   }
 
   // workshop worksheets
@@ -173,5 +144,5 @@ export async function exportRoadmapPdf() {
     doc.text(`${p}/${pages}`, W - M, 822, { align: 'right' });
   }
   const safe = org.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'ngo';
-  doc.save(`${safe}-90-day-digital-roadmap.pdf`);
+  doc.save(`${safe}-digital-maturity-results.pdf`);
 }

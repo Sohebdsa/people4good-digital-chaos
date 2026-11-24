@@ -44,6 +44,8 @@ function spriteSaver(): Plugin {
 
 export default defineConfig({
   plugins: [react(), spriteSaver()],
+  // `npm run server` in another terminal provides the shared leaderboard during development
+  server: { proxy: { '/api': 'http://localhost:8787' } },
   build: {
     chunkSizeWarningLimit: 1200,
     rollupOptions: {

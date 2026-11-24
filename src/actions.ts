@@ -7,8 +7,19 @@ export function click() {
   audio.play('click');
 }
 
+/** Start a run. The first time a player without a name presses Play, ask for one (once). */
 export function launchRun(req: RunRequest) {
   click();
+  const { settings } = useApp.getState();
+  if (!settings.playerName && !settings.namePrompted) {
+    useApp.setState({ pendingRun: req });
+    return;
+  }
+  startRunNow(req);
+}
+
+export function startRunNow(req: RunRequest) {
+  useApp.setState({ pendingRun: null });
   useApp.getState().startRun(req);
   getGame()?.startRun(req);
 }

@@ -66,7 +66,7 @@ export function GateModal() {
             <div className={`result ${correct ? 'good' : 'bad'}`}>
               <div className="row">
                 <span className={`badge ${correct ? 'good' : 'bad'}`}>{correct ? 'Better practice' : 'Risky choice'}</span>
-                <b>{correct ? '+200 points · +1 health' : gate.protectedByOversight ? 'Human Oversight caught the mistake — no health lost' : '−1 health'}</b>
+                <b>{correct ? '+200 points' : gate.protectedByOversight ? 'Human Oversight caught the mistake — no health lost' : '−1 health'}</b>
               </div>
               <div>{scenario.explanation}</div>
               {article && <div className="muted" style={{ fontSize: 13 }}>Learn more later in the Knowledge Center: “{article.title}”.</div>}
