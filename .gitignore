@@ -11,3 +11,8 @@ dist
 
 # leaderboard data (participant nicknames + scores)
 server/data/
+.vercel
+.env*
+
+# public, non-secret build setting (leaderboard URL)
+!.env.production

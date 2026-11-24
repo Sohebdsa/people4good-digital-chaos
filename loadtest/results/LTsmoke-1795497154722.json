@@ -1,0 +1,239 @@
+{
+  "target": "https://people4good-digital-chaos.vercel.app",
+  "users": 3,
+  "rounds": 1,
+  "tag": "LTsmoke",
+  "startedAt": "2026-11-24T05:12:12.617Z",
+  "durationSec": 22,
+  "spikeWallSec": 5.4,
+  "storedAfter": 4,
+  "groups": {
+    "pageload | html": {
+      "count": 3,
+      "ok": 3,
+      "okPct": 100,
+      "codes": {
+        "200": 3
+      },
+      "p50": 246,
+      "p90": 684,
+      "p95": 684,
+      "p99": 684,
+      "max": 684,
+      "overClientTimeout": 0,
+      "mb": 0
+    },
+    "pageload | asset": {
+      "count": 48,
+      "ok": 48,
+      "okPct": 100,
+      "codes": {
+        "200": 48
+      },
+      "p50": 919,
+      "p90": 3614,
+      "p95": 4210,
+      "p99": 4450,
+      "max": 4450,
+      "overClientTimeout": 4,
+      "mb": 11.9
+    },
+    "pageload | full-page": {
+      "count": 3,
+      "ok": 3,
+      "okPct": 100,
+      "codes": {
+        "200": 3
+      },
+      "p50": 5802,
+      "p90": 5802,
+      "p95": 5802,
+      "p99": 5802,
+      "max": 5802,
+      "overClientTimeout": 3,
+      "mb": 0
+    },
+    "play | GET /api/leaderboard": {
+      "count": 6,
+      "ok": 6,
+      "okPct": 100,
+      "codes": {
+        "200": 6
+      },
+      "p50": 113,
+      "p90": 349,
+      "p95": 349,
+      "p99": 349,
+      "max": 349,
+      "overClientTimeout": 0,
+      "mb": 0
+    },
+    "play | POST /api/scores": {
+      "count": 3,
+      "ok": 3,
+      "okPct": 100,
+      "codes": {
+        "200": 3
+      },
+      "p50": 1368,
+      "p90": 2418,
+      "p95": 2418,
+      "p99": 2418,
+      "max": 2418,
+      "overClientTimeout": 0,
+      "mb": 0
+    },
+    "spike | POST /api/scores": {
+      "count": 3,
+      "ok": 3,
+      "okPct": 100,
+      "codes": {
+        "200": 3
+      },
+      "p50": 4133,
+      "p90": 5428,
+      "p95": 5428,
+      "p99": 5428,
+      "max": 5428,
+      "overClientTimeout": 0,
+      "mb": 0
+    },
+    "spike | GET /api/leaderboard": {
+      "count": 3,
+      "ok": 3,
+      "okPct": 100,
+      "codes": {
+        "200": 3
+      },
+      "p50": 335,
+      "p90": 336,
+      "p95": 336,
+      "p99": 336,
+      "max": 336,
+      "overClientTimeout": 0,
+      "mb": 0
+    }
+  },
+  "errorsSample": [],
+  "timeline": [
+    [
+      513,
+      "pre",
+      "GET /api/health",
+      200,
+      509
+    ],
+    [
+      6939,
+      "play",
+      "GET /api/leaderboard",
+      200,
+      349
+    ],
+    [
+      8950,
+      "play",
+      "GET /api/leaderboard",
+      200,
+      106
+    ],
+    [
+      9103,
+      "play",
+      "GET /api/leaderboard",
+      200,
+      237
+    ],
+    [
+      10035,
+      "play",
+      "POST /api/scores",
+      200,
+      1257
+    ],
+    [
+      10135,
+      "play",
+      "GET /api/leaderboard",
+      200,
+      100
+    ],
+    [
+      11598,
+      "play",
+      "POST /api/scores",
+      200,
+      1368
+    ],
+    [
+      11711,
+      "play",
+      "GET /api/leaderboard",
+      200,
+      113
+    ],
+    [
+      13052,
+      "play",
+      "POST /api/scores",
+      200,
+      2418
+    ],
+    [
+      13138,
+      "play",
+      "GET /api/leaderboard",
+      200,
+      87
+    ],
+    [
+      17900,
+      "spike",
+      "POST /api/scores",
+      200,
+      1757
+    ],
+    [
+      20277,
+      "spike",
+      "POST /api/scores",
+      200,
+      4133
+    ],
+    [
+      21571,
+      "spike",
+      "POST /api/scores",
+      200,
+      5428
+    ],
+    [
+      21734,
+      "spike",
+      "GET /api/leaderboard",
+      200,
+      161
+    ],
+    [
+      21906,
+      "spike",
+      "GET /api/leaderboard",
+      200,
+      335
+    ],
+    [
+      21907,
+      "spike",
+      "GET /api/leaderboard",
+      200,
+      336
+    ],
+    [
+      22100,
+      "post",
+      "GET /api/leaderboard",
+      200,
+      193
+    ]
+  ]
+}
