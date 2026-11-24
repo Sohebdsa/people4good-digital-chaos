@@ -1,0 +1,10 @@
+# dependencies & build output
+node_modules
+dist
+*.tsbuildinfo
+*.log
+.DS_Store
+
+# third-party agent skills (reinstall with: npx skills add — see skills-lock.json)
+.agents/
+.claude/skills/

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sprite Studio · PEOPLE4GOOD</title>
+    <style>
+      :root { color-scheme: light; }
+      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: #f4efe2; color: #14213d; }
+      header { padding: 14px 18px; background: #14213d; color: #fff; display: flex; gap: 14px; align-items: center; }
+      header b { color: #ffc93c; }
+      #status { opacity: 0.85; }
+      #grid { display: flex; flex-wrap: wrap; gap: 10px; padding: 16px; }
+      figure { margin: 0; background: repeating-conic-gradient(#e8dcc4 0 25%, #fffdf7 0 50%) 0 0 / 16px 16px; border: 2px solid #14213d; border-radius: 10px; padding: 4px; }
+      figure img { display: block; max-width: 220px; max-height: 160px; }
+      figcaption { font-size: 11px; padding: 2px 4px; background: #fffdf7; }
+    </style>
+  </head>
+  <body>
+    <header><b>Sprite Studio</b><span id="status">loading…</span></header>
+    <div id="grid"></div>
+    <script type="module" src="/src/tools/spriteStudio.ts"></script>
+  </body>
+</html>
