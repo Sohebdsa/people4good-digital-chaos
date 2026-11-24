@@ -28,6 +28,7 @@ export interface SubmitResult extends Board {
 
 const BASE = ((import.meta.env.VITE_LEADERBOARD_URL as string | undefined) ?? '').replace(/\/$/, '');
 const TOP = 10;
+const WRITE_TIMEOUT = 20_000;
 const LOCAL_KEY = 'leaderboard-local';
 
 type LocalEntry = Omit<LbEntry, 'rank'> & { key: string };
@@ -77,7 +78,8 @@ export async function submitScore(run: { name: string; score: number; distance: 
   const name = validNickname(run.name);
   if (!name) return { entries: [], online: false, rank: null, best: run.score, error: 'Use 1–16 letters, numbers, spaces, dots, dashes or underscores.' };
   try {
-    const res = await request('/api/scores', { method: 'POST', body: JSON.stringify({ ...run, name }) });
+    // writes can queue behind other players' saves on the hosted board, so allow longer than reads
+    const res = await request('/api/scores', { method: 'POST', body: JSON.stringify({ ...run, name }) }, WRITE_TIMEOUT);
     if (res.status >= 500) throw new Error('server error');
     const data = await res.json();
     if (!res.ok) return { entries: [], online: true, rank: null, best: run.score, error: data.error ?? 'Could not save score.' };
@@ -100,7 +102,7 @@ export async function submitScore(run: { name: string; score: number; distance: 
 
 export async function resetBoard(adminToken: string): Promise<{ ok: boolean; error?: string }> {
   try {
-    const res = await request('/api/leaderboard', { method: 'DELETE', headers: { authorization: `Bearer ${adminToken}` } });
+    const res = await request('/api/leaderboard', { method: 'DELETE', headers: { authorization: `Bearer ${adminToken}` } }, WRITE_TIMEOUT);
     if (res.ok) return { ok: true };
     const data = await res.json().catch(() => ({}));
     return { ok: false, error: data.error ?? `Reset failed (${res.status}).` };
@@ -116,7 +118,7 @@ export function clearLocalBoard() {
 /** Admin: remove one participant (shared board, or this device's board when offline). */
 export async function removeEntry(name: string, adminToken: string): Promise<{ ok: boolean; entries: LbEntry[]; online: boolean; error?: string }> {
   try {
-    const res = await request(`/api/scores?name=${encodeURIComponent(name)}`, { method: 'DELETE', headers: { authorization: `Bearer ${adminToken}` } });
+    const res = await request(`/api/scores?name=${encodeURIComponent(name)}`, { method: 'DELETE', headers: { authorization: `Bearer ${adminToken}` } }, WRITE_TIMEOUT);
     if (res.status >= 500) throw new Error('server error');
     const data = await res.json().catch(() => ({}));
     if (!res.ok) return { ok: false, entries: [], online: true, error: data.error ?? `Remove failed (${res.status}).` };

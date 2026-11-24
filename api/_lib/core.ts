@@ -107,7 +107,8 @@ async function load(): Promise<{ entries: Entry[]; etag: string | null }> {
   } catch {
     entries = [];
   }
-  return { entries: sortEntries(entries), etag: r.blob.etag };
+  // get() reports a weak ETag (W/"…", the response is compressed); conditional writes need the strong form
+  return { entries: sortEntries(entries), etag: r.blob.etag.replace(/^W\//, '') };
 }
 
 export async function readEntries(): Promise<Entry[]> {
@@ -118,7 +119,7 @@ export async function readEntries(): Promise<Entry[]> {
  * Read-modify-write with optimistic concurrency. `change` returns false when nothing needs saving.
  */
 export async function mutate<T>(change: (entries: Entry[]) => { save: boolean; result: (entries: Entry[]) => T }): Promise<T> {
-  for (let attempt = 0; attempt < 6; attempt++) {
+  for (let attempt = 0; attempt < 12; attempt++) {
     const { entries, etag } = await load();
     const { save, result } = change(entries);
     if (!save) return result(entries);
@@ -136,7 +137,8 @@ export async function mutate<T>(change: (entries: Entry[]) => { save: boolean; r
       const conflict =
         e instanceof BlobPreconditionFailedError || (e instanceof BlobError && /exist/i.test(e.message) && !etag);
       if (!conflict) throw e;
-      await new Promise((r) => setTimeout(r, 40 + Math.random() * 120)); // someone else saved first: retry
+      // someone else saved first: back off (grows with attempts, jittered) and retry
+      await new Promise((r) => setTimeout(r, Math.min(1500, 60 * 2 ** Math.min(attempt, 5)) * (0.5 + Math.random())));
     }
   }
   throw new Error('busy');
