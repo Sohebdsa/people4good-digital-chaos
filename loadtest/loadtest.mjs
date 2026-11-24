@@ -2,7 +2,7 @@
 /**
  * Load test for the hosted Digital Chaos game.
  *
- *   node loadtest/loadtest.mjs --users 50 [--url https://...] [--rounds 2] [--play 15-45]
+ *   node loadtest/loadtest.mjs --users 50 [--url https://...] [--rounds 2] [--play 15-45] [--assets full|none]
  *
  * Each virtual player does what a real one does against the server:
  *   1. Page load   – index.html, the JS/CSS it references, sprite atlases + a background.
@@ -29,9 +29,18 @@ const ROUNDS = Number(args.rounds ?? 2);
 const [PLAY_MIN, PLAY_MAX] = (args.play ?? '15-45').split('-').map(Number);
 const RAMP_MS = Number(args.ramp ?? 5000);
 const TAG = args.tag ?? `LT${USERS}`;
+const ASSETS = args.assets ?? 'full'; // full | none (html only: use when the test machine's own bandwidth is the bottleneck)
 const READ_TIMEOUT = 4000;
 const WRITE_TIMEOUT = 20000;
 const HARD_TIMEOUT = 30000;
+
+// Protected preview deployments: set VERCEL_BYPASS to the project's "Protection Bypass for
+// Automation" secret and every request carries it.
+if (process.env.VERCEL_BYPASS) {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (input, init = {}) =>
+    realFetch(input, { ...init, headers: { ...(init.headers ?? {}), 'x-vercel-protection-bypass': process.env.VERCEL_BYPASS } });
+}
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -79,7 +88,7 @@ async function pageLoad(user, assets) {
   const start = performance.now();
   const r = await hit('pageload', 'html', user, '/');
   // browsers fetch ~6 at a time per origin over h1, many more over h2; use 6 to stay realistic
-  const queue = [...assets, `/assets/sprites/backgrounds/${BACKGROUNDS[user % 5]}.png`];
+  const queue = ASSETS === 'none' ? [] : [...assets, `/assets/sprites/backgrounds/${BACKGROUNDS[user % 5]}.png`];
   await Promise.all(Array.from({ length: 6 }, async () => {
     while (queue.length) await hit('pageload', 'asset', user, queue.shift());
   }));
