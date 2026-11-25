@@ -44,6 +44,10 @@ export class Spawner {
   nextGate = 0;
   private gatesEnabled = true;
   private lastPower: PowerId | null = null;
+  /** One tool type at a time: keep it until toolUntil, then leave a gap before the next type. */
+  private curTool: string | null = null;
+  private toolUntil = 0;
+  private toolEnd = -Infinity;
 
   reset(startS: number, gates = true) {
     this.prevRow = startS + 20;
@@ -52,6 +56,28 @@ export class Spawner {
     this.nextGate = startS + GATE_FIRST;
     this.gatesEnabled = gates;
     this.lastPower = null;
+    this.curTool = null;
+    this.toolUntil = 0;
+    this.toolEnd = -Infinity;
+  }
+
+  /**
+   * The tool type for a collectible line from start to end, or null to leave this stretch empty.
+   * Every line holds a single type, and a new type only appears once the runner has had
+   * time (~3 s) to read the toast for the previous one, so item toasts never stack up.
+   */
+  private toolFor(env: EnvDef, start: number, end: number, speed: number): string | null {
+    const keep = this.curTool !== null && start <= this.toolUntil && (env.toolWeights[this.curTool] ?? 0) > 0;
+    if (!keep) {
+      const next = weighted(env.toolWeights);
+      if (next !== this.curTool) {
+        if (this.curTool !== null && start < this.toolEnd + Math.max(speed * 3, 35)) return null;
+        this.curTool = next;
+      }
+      this.toolUntil = start + 110 + Math.random() * 70;
+    }
+    this.toolEnd = Math.max(this.toolEnd, end);
+    return this.curTool;
   }
 
   private pickRisk(env: EnvDef, d: number, exclude?: RiskShape): string | null {
@@ -76,7 +102,8 @@ export class Spawner {
           out.push({ kind: 'gate', s: this.nextGate });
           // a reward line leading into the gate
           const lane = Math.floor(Math.random() * 3);
-          for (let k = 0; k < 5; k++) out.push({ kind: 'tool', id: weighted(env.toolWeights), lane, s: this.nextGate - 22 + k * 3, y: 1 });
+          const id = this.toolFor(env, this.nextGate - 22, this.nextGate - 10, speed);
+          if (id) for (let k = 0; k < 5; k++) out.push({ kind: 'tool', id, lane, s: this.nextGate - 22 + k * 3, y: 1 });
           this.prevRow = this.nextGate + 6;
           this.nextRow = this.nextGate + 32;
           this.nextGate += GATE_EVERY;
@@ -107,9 +134,10 @@ export class Spawner {
       const occupied = new Set(row.map((x) => x.lane));
       const free = [0, 1, 2].filter((l) => !occupied.has(l));
       const lowRisk = row.find((x) => x.shape === 'low');
-      if (lowRisk && Math.random() < 0.3) {
+      const arcId = lowRisk && Math.random() < 0.3 ? this.toolFor(env, s - 5, s + 5, speed) : null;
+      if (lowRisk && arcId) {
         // arc over a low risk — teaches jumping
-        const id = weighted(env.toolWeights);
+        const id = arcId;
         for (let k = -2; k <= 2; k++) {
           const f = k / 2.6;
           out.push({ kind: 'tool', id, lane: lowRisk.lane, s: s + k * 2.4, y: 1 + 1.7 * (1 - f * f) });
@@ -118,8 +146,8 @@ export class Spawner {
         const lane = free.length ? free[Math.floor(Math.random() * free.length)] : Math.floor(Math.random() * 3);
         const start = this.prevRow + 5;
         const end = s - 5;
-        const single = Math.random() < 0.7 ? weighted(env.toolWeights) : null;
-        for (let z = start; z <= end; z += 2.6) out.push({ kind: 'tool', id: single ?? weighted(env.toolWeights), lane, s: z, y: 1 });
+        const id = this.toolFor(env, start, end, speed);
+        if (id) for (let z = start; z <= end; z += 2.6) out.push({ kind: 'tool', id, lane, s: z, y: 1 });
       }
 
       // power-up
