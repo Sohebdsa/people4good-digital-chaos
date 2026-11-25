@@ -64,7 +64,9 @@ export interface RunRequest {
   workshopDay?: number;
 }
 
-const defaultSettings: Settings = { music: 0.55, sfx: 0.8, muted: false, quality: 'high', reduceMotion: false, showHints: true, spriteStyle: 'realistic', playerName: '', welcomed: false, namePrompted: false };
+// phones and tablets start on low quality (no shadows, 1x pixels); players can switch it in Settings
+const isTouchDevice = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches;
+const defaultSettings: Settings = { music: 0.55, sfx: 0.8, muted: false, quality: isTouchDevice ? 'low' : 'high', reduceMotion: false, showHints: true, spriteStyle: 'realistic', playerName: '', welcomed: false, namePrompted: false };
 const defaultProfile: Profile = {
   best: 0, bestDistance: 0, impact: 0, runs: 0, counters: {}, unlockedEnvs: ['maze'], discoveredRisks: [], discoveredTools: [],
   missionsDone: [], achievements: [], focusMission: null, tutorialSeen: false,

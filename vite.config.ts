@@ -53,7 +53,6 @@ export default defineConfig({
         // Vite 8 (Rolldown) only accepts the function form
         manualChunks(id: string) {
           if (/[\\/]node_modules[\\/]three[\\/]/.test(id)) return 'three';
-          if (/[\\/]node_modules[\\/]jspdf(-autotable)?[\\/]/.test(id)) return 'pdf';
         },
       },
     },
