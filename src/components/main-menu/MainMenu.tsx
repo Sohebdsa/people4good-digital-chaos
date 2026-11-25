@@ -6,7 +6,7 @@ import { useIsAdmin } from '../../systems/auth';
 
 /**
  * Main menu: one fixed panel that always fits the screen (no scrolling).
- * Order: brand → who's playing → title → Play → 2×3 feature grid → stats + settings.
+ * Order: brand → who's playing → title → Play → 2×2 feature grid → stats + settings.
  */
 export function MainMenu() {
   const profile = useApp((s) => s.profile);
@@ -52,14 +52,8 @@ export function MainMenu() {
         </button>
 
         <nav className="menu-grid" aria-label="Main menu">
-          <button className="btn teal" onClick={() => open('workshop')}>
-            <Icon name="users" color="#fff" /> Workshop
-          </button>
           <button className="btn" onClick={() => open('learning')}>
             <Icon name="book" color="#14213d" /> Learning
-          </button>
-          <button className="btn" onClick={() => open('assessment')}>
-            <Icon name="chart" color="#14213d" /> Assessment
           </button>
           <button className="btn" onClick={() => open('missions')}>
             <Icon name="target" color="#14213d" /> Missions

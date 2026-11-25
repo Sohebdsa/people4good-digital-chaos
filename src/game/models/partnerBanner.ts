@@ -7,8 +7,9 @@ import { box, cyl, mat } from './kit';
  * MeshBasicMaterial keeps them readable in every environment, including the night-time districts.
  */
 export const PARTNERS = [
-  { id: 'tech4dev', name: 'Project Tech4Dev', file: 'tech4dev-logo.png' },
-  { id: 'infoxchange', name: 'Infoxchange', file: 'infoxchange-logo.png' },
+  { id: 'people4good', name: 'People4good', file: 'people4good-logo.png', caption: 'BROUGHT TO YOU BY' },
+  { id: 'tech4dev', name: 'Project Tech4Dev', file: 'tech4dev-logo.png', caption: 'IN PARTNERSHIP WITH' },
+  { id: 'infoxchange', name: 'Infoxchange', file: 'infoxchange-logo.png', caption: 'IN PARTNERSHIP WITH' },
 ] as const;
 export type PartnerId = (typeof PARTNERS)[number]['id'];
 
@@ -32,7 +33,7 @@ function partnerMaterial(id: PartnerId): THREE.MeshBasicMaterial {
     c.fillStyle = '#5b6478';
     c.font = '600 40px "Inter", system-ui, sans-serif';
     c.textAlign = 'center';
-    c.fillText('IN PARTNERSHIP WITH', W / 2, 74);
+    c.fillText(partner.caption, W / 2, 74);
     if (img && img.naturalWidth) {
       // contain the logo inside the panel below the caption
       const boxW = W - 120;

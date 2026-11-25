@@ -689,7 +689,11 @@ export class Game {
     this.gatesSeen.add(id);
     const scenario = SCENARIOS.find((s) => s.id === id)!;
     this.currentGate = scenario;
-    const order = scenario.options.map((_, i) => i).sort(() => Math.random() - 0.5);
+    const order = scenario.options.map((_, i) => i);
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
+    }
     this.state = 'gate';
     this.player.idle();
     audio.play('gate');
